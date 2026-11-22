@@ -1,0 +1,32 @@
+<section class="card">
+  <label class="field-label" for="cidrInput">Address / prefix</label>
+  <div class="input-row">
+    <input id="cidrInput" type="text" placeholder="192.168.1.0/24 or 2001:db8::/32" autocomplete="off" spellcheck="false" />
+    <button id="analyzeBtn" class="btn btn-primary" type="button">Analyze</button>
+  </div>
+  <p id="errorMsg" class="error-msg" style="display:none;"></p>
+  <div id="resultGrid" class="result-grid"></div>
+  <div class="actions" id="actions" style="display:none;">
+    <button id="exportTxt" class="btn btn-ghost" type="button">Export .txt</button>
+    <button id="exportCsv" class="btn btn-ghost" type="button">Export .csv</button>
+    <button id="copyResult" class="btn btn-ghost" type="button">Copy</button>
+  </div>
+</section>
+
+<style>
+  .input-row { display: flex; gap: 0.5rem; }
+  .input-row input { flex: 1; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 0.9rem; outline: none; }
+  .input-row input:focus { border-color: var(--border-strong); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 1rem; border-radius: var(--radius-pill); border: 1px solid transparent; font: inherit; font-weight: 500; font-size: 0.88rem; cursor: pointer; }
+  .btn-primary { background: var(--fg); color: var(--bg); }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); font-size: 0.82rem; padding: 0.5rem 0.75rem; }
+  .btn-ghost:hover { background: var(--bg); border-color: var(--border-strong); }
+  .error-msg { color: var(--danger); font-size: 0.85rem; margin: 0.75rem 0 0; }
+  .result-grid { display: grid; grid-template-columns: 1fr; gap: 0.4rem; margin-top: 1.25rem; }
+  .result-grid .row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; }
+  .result-grid .key { color: var(--fg-muted); }
+  .result-grid .val { font-family: var(--mono); color: var(--fg); word-break: break-all; text-align: right; }
+  .actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .actions .btn { flex: 1; }
+</style>

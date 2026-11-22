@@ -1,0 +1,86 @@
+---
+import Calculator from '../components/Calculator.astro';
+import Splitter from '../components/Splitter.astro';
+import Binary from '../components/Binary.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Subnet Calculator</title>
+    <meta name="description" content="IPv4 and IPv6 subnet calculator with splitting and binary view." />
+    <style is:global>
+      :root {
+        --bg: #ffffff;
+        --fg: #0d0d0d;
+        --fg-muted: #6b6b6b;
+        --fg-dim: #a3a3a3;
+        --surface: #f7f7f8;
+        --border: #e5e5e5;
+        --border-strong: #d4d4d4;
+        --accent: #10a37f;
+        --danger: #dc2626;
+        --radius: 12px;
+        --radius-lg: 16px;
+        --radius-pill: 999px;
+        --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --mono: 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d0d0d;
+          --fg: #f5f5f5;
+          --fg-muted: #a3a3a3;
+          --fg-dim: #6b6b6b;
+          --surface: #171717;
+          --border: #262626;
+          --border-strong: #3a3a3a;
+          --accent: #10a37f;
+          --danger: #ef4444;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 4rem 1.25rem 3rem;
+      }
+      .container { width: 100%; max-width: 640px; }
+      .header { text-align: center; margin-bottom: 2.5rem; }
+      .wordmark { display: block; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 1.25rem; }
+      h1 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 0.5rem; }
+      .subtitle { color: var(--fg-muted); margin: 0 auto; max-width: 460px; font-size: 0.95rem; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+      .card h2 { font-size: 0.95rem; font-weight: 600; margin: 0 0 1.25rem; }
+      .field-label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--fg-muted); margin-bottom: 0.5rem; }
+      footer { margin-top: 2rem; text-align: center; font-size: 0.78rem; color: var(--fg-dim); }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <span class="wordmark">Subnet Calculator</span>
+        <h1>IPv4 and IPv6, decoded.</h1>
+        <p class="subtitle">Network, broadcast, usable range, binary view, and subnet splitting.</p>
+      </header>
+      <Calculator />
+      <Binary />
+      <Splitter />
+      <footer>All calculations run in your browser.</footer>
+    </main>
+    <script>
+      import '../scripts/client';
+    </script>
+  </body>
+</html>
