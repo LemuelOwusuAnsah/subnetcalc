@@ -1,4 +1,4 @@
-import { analyze, split, toBinaryWithSplit, type SubnetInfo } from '../lib/subnet';
+import { analyze, split, type SubnetInfo } from '../lib/subnet';
 import { analyzeIPv6, type IPv6Analysis } from '../lib/ipv6';
 import { validateCidr, formatNumber } from '../lib/validate';
 import { toText, toCsv, download, type ExportRow } from '../lib/export';
@@ -35,6 +35,10 @@ type LastAnalysis =
   | null;
 
 let last: LastAnalysis = null;
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
+}
 
 function rowsFromInfo(family: 'ipv4' | 'ipv6', info: SubnetInfo | IPv6Analysis): ExportRow[] {
   if (family === 'ipv4') {
@@ -73,10 +77,6 @@ function renderGrid(rows: ExportRow[]): void {
     .join('');
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
-}
-
 function clearAll(): void {
   errorMsg.style.display = 'none';
   errorMsg.textContent = '';
@@ -96,46 +96,28 @@ function showError(msg: string): void {
   errorMsg.style.display = '';
 }
 
-function renderBinaryIpv4(ip: string, cidr: number): void {
-  const parts = toBinaryWithSplit(ip, cidr);
-  const netBits = parts.network;
-  const hostBits = parts.host;
-  const netOctets: string[] = [];
-  const hostOctets: string[] = [];
-  for (let i = 0; i < 32; i += 8) {
-    const nb = netBits.slice(Math.max(0, i), Math.min(i + 8, netBits.length));
-    const hb = hostBits.slice(Math.max(0, i - netBits.length), Math.min(i + 8 - netBits.length, hostBits.length));
-    if (nb.length + hb.length < 8 && i < netBits.length) {
-      const tail = netBits.slice(i, i + 8);
-      netOctets.push('<span class="net">' + (tail || '') + '</span>');
-      hostOctets.push('');
-    } else if (nb.length > 0 && hb.length === 0) {
-      netOctets.push('<span class="net">' + nb.padEnd(8, '') + '</span>');
-      hostOctets.push('');
-    } else if (nb.length === 0 && hb.length > 0) {
-      netOctets.push('');
-      hostOctets.push('<span class="host">' + hb.padEnd(8, '') + '</span>');
-    } else {
-      netOctets.push(nb ? '<span class="net">' + nb + '</span>' : '');
-      hostOctets.push(hb ? '<span class="host">' + hb + '</span>' : '');
-    }
-  }
-  const netLine = netOctets.filter(Boolean).map((o) => o || '........').join('.');
-  const hostLine = hostOctets.filter(Boolean).map((o) => o || '........').join('.');
-  binaryContent.innerHTML =
-    '<span class="label">Address</span>' +
-    '<div>' + toBinaryDots(ip) + '</div>' +
-    '<span class="label" style="margin-top:0.75rem;">Network / host split at /' + cidr + '</span>' +
-    '<div>' + netLine + hostLine.replace(/<span class="host">/g, '<span class="host">') + '</div>';
+function ipv4ToBits(ip: string): string {
+  return ip.split('.').map((p) => {
+    const n = Number(p);
+    return Number.isInteger(n) && n >= 0 && n <= 255 ? n.toString(2).padStart(8, '0') : '........';
+  }).join('');
 }
 
-function toBinaryDots(ip: string): string {
-  const parts = ip.split('.');
-  return parts.map((p) => {
-    const n = Number(p);
-    if (!Number.isInteger(n) || n < 0 || n > 255) return '........';
-    return n.toString(2).padStart(8, '0');
-  }).join('.');
+function renderBinaryIpv4(ip: string, cidr: number): void {
+  const bits = ipv4ToBits(ip);
+  const netBits = bits.slice(0, cidr);
+  const hostBits = bits.slice(cidr);
+
+  const dotted = (b: string) =>
+    b.match(/.{1,8}/g)?.map((x) => x.padEnd(8, '.')).join('.') ?? '';
+
+  binaryContent.innerHTML =
+    '<span class="label">Address</span>' +
+    '<div>' + dotted(bits) + '</div>' +
+    '<span class="label" style="margin-top:0.75rem;">Network bits /' + cidr + '</span>' +
+    '<div><span class="net">' + dotted(netBits) + '</span></div>' +
+    '<span class="label" style="margin-top:0.5rem;">Host bits</span>' +
+    '<div><span class="host">' + dotted(hostBits) + '</span></div>';
 }
 
 function renderBinaryIpv6(info: IPv6Analysis): void {
@@ -169,7 +151,8 @@ function runAnalyze(): void {
       actions.style.display = '';
       binaryCard.style.display = '';
       splitCard.style.display = '';
-      renderBinaryIpv4(info.networkAddress, info.cidr);
+      const addressPart = v.value.slice(0, v.value.lastIndexOf('/'));
+      renderBinaryIpv4(addressPart, info.cidr);
       setupSplit(info);
     } else {
       const info = analyzeIPv6(v.value);
